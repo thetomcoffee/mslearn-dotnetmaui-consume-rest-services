@@ -40,7 +40,13 @@ namespace PartsClient.Data
 
         public static async Task<IEnumerable<Part>> GetAll()
         {
-            throw new NotImplementedException();                
+            if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
+                return new List<Part>();
+
+            HttpClient client = await GetClient();
+            string result = await client.GetStringAsync($"{Url}parts");
+
+            return JsonConvert.DeserializeObject<List<Part>>(result);
         }
 
         public static async Task<Part> Add(string partName, string supplier, string partType)
