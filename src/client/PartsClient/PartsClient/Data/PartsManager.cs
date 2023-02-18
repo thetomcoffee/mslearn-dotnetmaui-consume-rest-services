@@ -13,14 +13,29 @@ namespace PartsClient.Data
     public static class PartsManager
     {
         // TODO: Add fields for BaseAddress, Url, and authorizationKey
-        static readonly string BaseAddress = "URL GOES HERE";
+        static readonly string BaseAddress = "https://mslearnpartsserver239825988.azurewebsites.net";
         static readonly string Url = $"{BaseAddress}/api/";
+        private static string authorizationKey;
 
         static HttpClient client;
 
         private static async Task<HttpClient> GetClient()
         {
-            throw new NotImplementedException();
+            if (client != null)
+                return client;
+
+            client = new HttpClient();
+
+            if (string.IsNullOrEmpty(authorizationKey))
+            {
+                authorizationKey = await client.GetStringAsync($"{Url}login");
+                authorizationKey = JsonConvert.DeserializeObject<string>(authorizationKey);
+            }
+
+            client.DefaultRequestHeaders.Add("Authorization", authorizationKey);
+            client.DefaultRequestHeaders.Add("Accept", "application/json");
+
+            return client;
         }
 
         public static async Task<IEnumerable<Part>> GetAll()
